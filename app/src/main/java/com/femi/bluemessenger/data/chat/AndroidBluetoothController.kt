@@ -52,7 +52,7 @@ class AndroidBluetoothController(
     override fun startDiscovery() {
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN))
             return
-
+    
         context.registerReceiver(
             foundDeviceReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)

@@ -7,20 +7,19 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.femi.bluemessenger.presentation.uicomponents.PhoneScreen
+import androidx.navigation.compose.rememberNavController
+import com.femi.bluemessenger.navigation.NavigationComponent
 import com.femi.bluemessenger.ui.theme.BlueMessengerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -37,12 +36,40 @@ class MainActivity : ComponentActivity() {
     private val isBluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled == true
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        permissionStuff()
+
+        setContent {
+            BlueMessengerTheme {
+                val viewModel = hiltViewModel<BluetoothViewModel>()
+                val state by viewModel.state.collectAsState()
+                val navController = rememberNavController()
+                val windowSizeClass = calculateWindowSizeClass(this)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+
+                    NavigationComponent(
+                        navController = navController,
+                        state = state,
+                        onStartScan = viewModel::startScan,
+                        onStopScan = viewModel::stopScan,
+                        windowSizeClass.widthSizeClass
+                    )
+                }
+            }
+        }
+    }
+
+    private fun permissionStuff() {
+
         val enableBluetoothLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
-        ) {  }
+        ) { }
 
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -66,23 +93,6 @@ class MainActivity : ComponentActivity() {
                     Manifest.permission.BLUETOOTH_CONNECT,
                 )
             )
-        }
-
-        setContent {
-            BlueMessengerTheme {
-                val viewModel = hiltViewModel<BluetoothViewModel>()
-                val state by viewModel.state.collectAsState()
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    PhoneScreen(
-                        state = state,
-                        onStartScan = viewModel::startScan,
-                        onStopScan = viewModel::stopScan
-                    )
-                }
-            }
         }
     }
 }
