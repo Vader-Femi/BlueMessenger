@@ -80,17 +80,6 @@ fun ScanScreen(
             ) {
                 Text(text = "Stop Scan")
             }
-
-            repeat(2){
-                Button(
-                    onClick = {},
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier
-                        .padding(4.dp),
-                ) {
-                    Text(text = "Rand Button ${it + 3}")
-                }
-            }
         }
     }
 }
