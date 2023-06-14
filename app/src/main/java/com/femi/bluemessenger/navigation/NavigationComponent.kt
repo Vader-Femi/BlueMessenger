@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.femi.bluemessenger.domain.chat.BluetoothDevice
 import com.femi.bluemessenger.presentation.BluetoothUiState
 import com.femi.bluemessenger.presentation.uicomponents.ScanScreen
 
@@ -14,6 +15,10 @@ fun NavigationComponent(
     state: BluetoothUiState,
     onStartScan: () -> Unit,
     onStopScan: () -> Unit,
+    onDeviceClicked: (BluetoothDevice) -> Unit,
+    onStartServer: () -> Unit,
+    onDisconnect: () -> Unit,
+    onSendMessage: (message: String) -> Unit,
     widthSizeClass: WindowWidthSizeClass,
 ) {
 
@@ -27,7 +32,11 @@ fun NavigationComponent(
                 state = state,
                 widthSizeClass = widthSizeClass,
                 onStartScan = onStartScan,
-                onStopScan = onStopScan
+                onStopScan = onStopScan,
+                onDeviceClicked = onDeviceClicked,
+                onStartServer = onStartServer,
+                onDisconnect = onDisconnect,
+                onSendMessage = onSendMessage
             )
         }
     }

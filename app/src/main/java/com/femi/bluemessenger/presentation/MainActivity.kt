@@ -52,13 +52,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     NavigationComponent(
                         navController = navController,
                         state = state,
                         onStartScan = viewModel::startScan,
                         onStopScan = viewModel::stopScan,
-                        windowSizeClass.widthSizeClass
+                        onDeviceClicked = viewModel::connectToDevice,
+                        onStartServer = viewModel::waitForIncomingConnections,
+                        onDisconnect = viewModel::disconnectFormDevice,
+                        onSendMessage = viewModel::sendMessage,
+                        windowSizeClass.widthSizeClass,
                     )
                 }
             }
