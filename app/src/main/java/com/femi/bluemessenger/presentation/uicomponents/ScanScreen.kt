@@ -30,7 +30,6 @@ import com.femi.bluemessenger.R
 import com.femi.bluemessenger.domain.chat.BluetoothDevice
 import com.femi.bluemessenger.presentation.BluetoothUiState
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScanScreen(
     state: BluetoothUiState,
@@ -38,9 +37,7 @@ fun ScanScreen(
     onStartScan: () -> Unit,
     onStopScan: () -> Unit,
     onDeviceClicked: (BluetoothDevice) -> Unit,
-    onStartServer: () -> Unit,
-    onDisconnect: () -> Unit,
-    onSendMessage: (message: String) -> Unit,
+    onStartServer: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -56,28 +53,6 @@ fun ScanScreen(
             if (state.isConnected) {
                 Toast.makeText(context, R.string.connected, Toast.LENGTH_SHORT).show()
             }
-        }
-
-        when {
-            state.isConnecting -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    Text(text = stringResource(R.string.connecting))
-                }
-
-            }
-            state.isConnected -> {
-                ChatScreen(
-                    state = state,
-                    onDisconnect = onDisconnect,
-                    onSendMessage = onSendMessage
-                )
-            }
-
         }
 
         when (widthSizeClass) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.femi.bluemessenger.navigation.NavigationComponent
+import com.femi.bluemessenger.navigation.Screen
 import com.femi.bluemessenger.ui.theme.BlueMessengerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,8 +62,14 @@ class MainActivity : ComponentActivity() {
                         onStartServer = viewModel::waitForIncomingConnections,
                         onDisconnect = viewModel::disconnectFormDevice,
                         onSendMessage = viewModel::sendMessage,
-                        windowSizeClass.widthSizeClass,
+                        widthSizeClass = windowSizeClass.widthSizeClass,
                     )
+
+                    when {
+                        state.isConnected -> navController.navigate(Screen.ChatScreen.route)
+                        state.isConnecting -> navController.navigate(Screen.LoadingScreen.route)
+                        else -> navController.navigate(Screen.ScanBluetoothScreen.route)
+                    }
                 }
             }
         }
@@ -93,7 +100,15 @@ class MainActivity : ComponentActivity() {
             permissionLauncher.launch(
                 arrayOf(
                     Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                )
+            )
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
                 )
             )
         }

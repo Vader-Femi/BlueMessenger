@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.femi.bluemessenger.domain.chat.BluetoothDevice
 import com.femi.bluemessenger.presentation.BluetoothUiState
+import com.femi.bluemessenger.presentation.uicomponents.ChatScreen
+import com.femi.bluemessenger.presentation.uicomponents.LoadingScreen
 import com.femi.bluemessenger.presentation.uicomponents.ScanScreen
 
 @Composable
@@ -34,7 +36,17 @@ fun NavigationComponent(
                 onStartScan = onStartScan,
                 onStopScan = onStopScan,
                 onDeviceClicked = onDeviceClicked,
-                onStartServer = onStartServer,
+                onStartServer = onStartServer
+            )
+        }
+        composable(route = Screen.LoadingScreen.route) {
+            LoadingScreen(
+                state = state
+            )
+        }
+        composable(route = Screen.ChatScreen.route) {
+            ChatScreen(
+                state = state,
                 onDisconnect = onDisconnect,
                 onSendMessage = onSendMessage
             )

@@ -10,6 +10,8 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
 import com.femi.bluemessenger.domain.chat.BluetoothController
 import com.femi.bluemessenger.domain.chat.BluetoothDeviceDomain
 import com.femi.bluemessenger.domain.chat.BluetoothMessage
@@ -75,10 +77,10 @@ class AndroidBluetoothController(
     }
 
     private val bluetoothStateReceiver = BluetoothStateReceiver { isConnected, bluetoothDevice ->
-        if (bluetoothAdapter?.bondedDevices?.contains(bluetoothDevice) == true){
+        if (bluetoothAdapter?.bondedDevices?.contains(bluetoothDevice) == true) {
             _isConnected.update { isConnected }
         } else {
-            CoroutineScope (Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.IO).launch {
                 _errors.tryEmit("Can't conect to a non-paired device")
             }
         }
@@ -102,8 +104,14 @@ class AndroidBluetoothController(
     }
 
     override fun startDiscovery() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN))
-            return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN))
+                return
+        } else {
+            if (!hasPermission(Manifest.permission.BLUETOOTH))
+                return
+        }
+
 
         context.registerReceiver(
             foundDeviceReceiver,
@@ -123,8 +131,13 @@ class AndroidBluetoothController(
 
     override fun startBluetoothServer(): Flow<ConnectionResult> {
         return flow {
-            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
-                throw SecurityException("No Bluetooth Connect Permission")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
+                    throw SecurityException("No Bluetooth Connect Permission")
+            } else {
+                if (!hasPermission(Manifest.permission.BLUETOOTH))
+                    throw SecurityException("No Bluetooth Connect Permission")
+            }
 
             currentServerSocket = bluetoothAdapter?.listenUsingRfcommWithServiceRecord(
                 "chat_service",
@@ -161,8 +174,13 @@ class AndroidBluetoothController(
 
     override fun connectToDevice(device: BluetoothDeviceDomain): Flow<ConnectionResult> {
         return flow {
-            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
-                throw SecurityException("No Bluetooth Connect Permission")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
+                    throw SecurityException("No Bluetooth Connect Permission")
+            } else {
+                if (!hasPermission(Manifest.permission.BLUETOOTH))
+                    throw SecurityException("No Bluetooth Connect Permission")
+            }
 
             val bluetoothDevice = bluetoothAdapter
                 ?.getRemoteDevice(device.address)
@@ -184,7 +202,7 @@ class AndroidBluetoothController(
                             .map { ConnectionResult.TransferSucceeded(it) }
                         )
                     }
-                } catch (e: IOException){
+                } catch (e: IOException) {
                     socket.close()
                     currentClientSocket = null
                     emit(ConnectionResult.Error("Connection was interrupted"))
@@ -196,10 +214,15 @@ class AndroidBluetoothController(
     }
 
     override suspend fun trySendMessage(message: String): BluetoothMessage? {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
-            return null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
+                return null
+        } else {
+            if (!hasPermission(Manifest.permission.BLUETOOTH))
+                return null
+        }
 
-        if (dataTransferService == null){
+        if (dataTransferService == null) {
             return null
         }
 
@@ -230,8 +253,13 @@ class AndroidBluetoothController(
     }
 
     private fun updatePairedDevices() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
-            return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT))
+                return
+        } else {
+            if (!hasPermission(Manifest.permission.BLUETOOTH))
+                return
+        }
 
         bluetoothAdapter
             ?.bondedDevices
@@ -242,7 +270,9 @@ class AndroidBluetoothController(
     }
 
     private fun hasPermission(permission: String): Boolean {
-        return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+        val perm = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+        Log.d(permission, "$permission - $perm")
+        return perm
     }
 
     companion object {

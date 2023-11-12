@@ -3,7 +3,8 @@ package com.femi.bluemessenger.navigation
 sealed class Screen(val route: String) {
     object BluetoothRoute : Screen("bluetooth_route")
     object ScanBluetoothScreen : Screen("scan_bluetooth_screen")
-    object chatScreen : Screen("chat_screen")
+    object ChatScreen : Screen("chat_screen")
+    object LoadingScreen : Screen("loading_screen")
 
     fun withArgs(vararg args: Pair<String, String>): String {
         return buildString {
